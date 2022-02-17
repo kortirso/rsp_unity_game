@@ -12,7 +12,8 @@ public enum GameChoices {
   SPOCK
 }
 
-public class GameplayController : MonoBehaviour {
+public class GameplayController : MonoBehaviour
+{
   [SerializeField]
   private Sprite rockSprite, scissorsSprite, paperSprite, lizardSprite, spockSprite;
 

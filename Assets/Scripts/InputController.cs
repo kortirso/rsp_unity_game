@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputController : MonoBehaviour {
-
+public class InputController : MonoBehaviour
+{
   private AnimationController animationController;
   private GameplayController gameplayController;
 
