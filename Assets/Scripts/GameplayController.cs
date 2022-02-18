@@ -14,6 +14,9 @@ public enum GameChoices {
 
 public class GameplayController : MonoBehaviour
 {
+  public Dictionary<GameChoices, int> rockResults, paperResults, scissorsResults;
+  public Dictionary<GameChoices, Dictionary<GameChoices, int>> gameResults;
+
   [SerializeField]
   private Sprite rockSprite, scissorsSprite, paperSprite, lizardSprite, spockSprite;
 
@@ -29,6 +32,44 @@ public class GameplayController : MonoBehaviour
 
   void Awake() {
     animationController = GetComponent<AnimationController>();
+  }
+
+  void Start() {
+    rockResults = new Dictionary<GameChoices, int>()
+    {
+      { GameChoices.ROCK, 0 },
+      { GameChoices.PAPER, -1 },
+      { GameChoices.SCISSORS, 1 },
+      { GameChoices.LIZARD, 0 },
+      { GameChoices.SPOCK, 0 },
+    };
+
+    paperResults = new Dictionary<GameChoices, int>()
+    {
+      { GameChoices.ROCK, 1 },
+      { GameChoices.PAPER, 0 },
+      { GameChoices.SCISSORS, -1 },
+      { GameChoices.LIZARD, 0 },
+      { GameChoices.SPOCK, 0 },
+    };
+
+    scissorsResults = new Dictionary<GameChoices, int>()
+    {
+      { GameChoices.ROCK, -1 },
+      { GameChoices.PAPER, 1 },
+      { GameChoices.SCISSORS, 0 },
+      { GameChoices.LIZARD, 0 },
+      { GameChoices.SPOCK, 0 },
+    };
+
+    gameResults = new Dictionary<GameChoices, Dictionary<GameChoices, int>>()
+    {
+      { GameChoices.ROCK, rockResults },
+      { GameChoices.PAPER, paperResults },
+      { GameChoices.SCISSORS, scissorsResults },
+      { GameChoices.LIZARD, rockResults },
+      { GameChoices.SPOCK, rockResults },
+    };
   }
 
   public void SetChoice(GameChoices gameChoice) {
@@ -87,7 +128,17 @@ public class GameplayController : MonoBehaviour
   }
 
   void DetermineWinner() {
-    infoText.text = "Result";
+    switch(gameResults[playerChoice][opponentChoice]) {
+      case 0:
+        infoText.text = "Draw";
+        break;
+      case 1:
+        infoText.text = "Win";
+        break;
+      case -1:
+        infoText.text = "Lose";
+        break;
+    }
 
     StartCoroutine(DisplayWinnerAndRestart());
     return;
