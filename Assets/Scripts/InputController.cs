@@ -14,6 +14,15 @@ public class InputController : MonoBehaviour
     gameplayController = GetComponent<GameplayController>();
   }
 
+  public void StartGameCreation() {
+    animationController.ShowScreen(1);
+  }
+
+  public void StartGame() {
+    gameplayController.clearMatchStatistic();
+    animationController.ShowScreen(2);
+  }
+
   public void GetChoice() {
     string choiceName = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name;
     GameChoices selectedChoice = GameChoices.NONE;

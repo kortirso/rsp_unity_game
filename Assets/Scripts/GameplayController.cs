@@ -12,6 +12,11 @@ public enum GameChoices {
   SPOCK
 }
 
+public enum MatchTypes {
+  BEST, // best from X games
+  WINS // play until X wins
+}
+
 public class GameplayController : MonoBehaviour
 {
   public Dictionary<GameChoices, int> rockResults, paperResults, scissorsResults;
@@ -24,9 +29,12 @@ public class GameplayController : MonoBehaviour
   private Image playerChoiceImage, opponentChoiceImage;
 
   [SerializeField]
-  private Text infoText;
+  private Text infoText, matchText;
 
   private GameChoices playerChoice = GameChoices.NONE, opponentChoice = GameChoices.NONE;
+
+  private int gameChoicesAmount = 3, limitValue = 3, playerWins = 0, opponentWins = 0, playedGames = 0;
+  private MatchTypes matchType = MatchTypes.BEST;
 
   private AnimationController animationController;
 
@@ -72,6 +80,57 @@ public class GameplayController : MonoBehaviour
     };
   }
 
+  public void SetGameChoicesAmount(int value) {
+    switch(value) {
+      case 0:
+        gameChoicesAmount = 3;
+        break;
+      case 1:
+        gameChoicesAmount = 5;
+        break;
+    }
+  }
+
+  public void SetMatchType(int value) {
+    switch(value) {
+      case 0:
+        matchType = MatchTypes.BEST;
+        break;
+      case 1:
+        matchType = MatchTypes.WINS;
+        break;
+    }
+  }
+
+  public void SetLimitValue(int value) {
+    switch(value) {
+      case 0:
+        limitValue = 3;
+        break;
+      case 1:
+        limitValue = 5;
+        break;
+      case 2:
+        limitValue = 7;
+        break;
+    }
+  }
+
+  public void clearMatchStatistic() {
+    playerWins = 0;
+    opponentWins = 0;
+    playedGames = 0;
+    infoText.text = "";
+    if (matchType == MatchTypes.BEST)
+    {
+      matchText.text = $"Best of {limitValue} games";
+    }
+    else
+    {
+      matchText.text = $"Until {limitValue} wins";
+    }
+  }
+
   public void SetChoice(GameChoices gameChoice) {
     switch(gameChoice) {
       case GameChoices.ROCK:
@@ -101,7 +160,7 @@ public class GameplayController : MonoBehaviour
   }
 
   void SetOpponentChoice() {
-    int random = Random.Range(0, 5);
+    int random = Random.Range(0, gameChoicesAmount);
 
     switch(random) {
       case 0:
@@ -130,25 +189,67 @@ public class GameplayController : MonoBehaviour
   void DetermineWinner() {
     switch(gameResults[playerChoice][opponentChoice]) {
       case 0:
-        infoText.text = "Draw";
         break;
       case 1:
-        infoText.text = "Win";
+        playerWins += 1;
         break;
       case -1:
-        infoText.text = "Lose";
+        opponentWins += 1;
         break;
     }
+    playedGames += 1;
 
-    StartCoroutine(DisplayWinnerAndRestart());
+    string gameResult = checkMatchResult();
+    StartCoroutine(DisplayWinnerAndRestart(gameResult));
     return;
   }
 
-  IEnumerator DisplayWinnerAndRestart() {
-    yield return new WaitForSeconds(2f);
-    infoText.gameObject.SetActive(true);
-    yield return new WaitForSeconds(2f);
-    infoText.gameObject.SetActive(false);
+  string checkMatchResult() {
+    if ((matchType == MatchTypes.BEST && playedGames == limitValue) || (matchType == MatchTypes.WINS && (playerWins == limitValue || opponentWins == limitValue)))
+    {
+      return checkPlayersWins();
+    }
+    else
+    {
+      return "None";
+    }
+  }
+
+  string checkPlayersWins() {
+    if (playerWins > opponentWins)
+    {
+      return "Win";
+    }
+    else if (playerWins < opponentWins)
+    {
+      return "Lose";
+    }
+    else
+    {
+      return "Draw";
+    }
+  }
+
+  IEnumerator DisplayWinnerAndRestart(string gameResult) {
+    yield return new WaitForSeconds(1f);
+
+    infoText.text = $"{playerWins}-{opponentWins}";
+    if (gameResult == "None")
+    {
+      infoText.text += $", after {playedGames} games";
+    }
+    else
+    {
+      infoText.text += $", {gameResult}";
+    }
+
+    yield return new WaitForSeconds(1f);
     animationController.ResetAnimations();
+
+    if (gameResult != "None")
+    {
+      yield return new WaitForSeconds(1f);
+      animationController.ShowScreen(0);
+    }
   }
 }
